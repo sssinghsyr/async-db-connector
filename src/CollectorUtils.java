@@ -37,25 +37,6 @@ public class CollectorUtils {
 			      a -> {/*System.out.println("Result from finisher:"+a[0]);*/return a[0];});
 	}
 	
-//	/* Ignoring format type as of now
-//	 * Will incorporate other format to return each rows values
-//	 * */
-//	public static Collector<Result.Row, String, String> rowCollector(String format) {
-//		return Collector.of(
-//			      () -> {System.out.println("Result from Supplier");return new String("start");},
-//			      (a, v) -> {
-//			    	check(v);
-//			        for(String column : v.getIdentifiers()) {
-//			           System.out.println("Column="+column);
-//			           a += v.get(column, Object.class);
-//			           a+=",";
-//			        }
-//			        System.out.println("Result from accumulator:"+a);
-//			      },
-//			      (a, b) -> {System.out.println("Result from combiner:"+a); return null;},
-//			      a -> {System.out.println("Result from finisher:"+a);return a;});
-//	}
-	
 	public static void check(Result.Row r) {
 		System.out.println(r.toString());
 	}

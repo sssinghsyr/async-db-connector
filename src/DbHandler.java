@@ -1,14 +1,6 @@
 import jdk.incubator.sql2.DataSource;
-import jdk.incubator.sql2.Result;
-
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 import org.postgresql.sql2.PGConnection;
-
-import jdk.incubator.sql2.Connection;
 
 public class DbHandler {
 	private DataSource ds;
@@ -36,7 +28,7 @@ public class DbHandler {
 		return fut.thenApply(s -> {ClientQueryReceiver.selector.wakeup(); System.out.println("Print inside thenApply");return s;}); 
 	}
 
-	public CompletableFuture<String> multipleRowOperation(String sql) {
+	public CompletableFuture<String> multipleRowOperation(String sql, int future_key) {
 		String debug = "select * from numbers1 limit 3";
 		System.out.println("debug="+escapeNonAscii(debug));
 		System.out.println("sql="+escapeNonAscii(sql));
@@ -47,7 +39,10 @@ public class DbHandler {
 				.collect(CollectorUtils.rowCollector("csv"))
 				.submit()
 				.getCompletionStage().toCompletableFuture();
-		return fut.thenApply(s -> {ClientQueryReceiver.selector.wakeup(); System.out.println("Print inside thenApply");return s;});
+		return fut.thenApply(s -> {QueryHandler.readyResponseIdx.add(future_key);
+									ClientQueryReceiver.selector.wakeup();
+									System.out.println("Print inside thenApply");
+									return s;});
 	}
 
 	private static String escapeNonAscii(String str) {
@@ -70,13 +65,4 @@ public class DbHandler {
 		}
 		return retStr.toString();
 	}
-
-	//	public CompletableFuture<String> multipleRowOperation1(String sql) {
-	//		CompletableFuture<String> fut = ((Object) conn.<String>rowOperation("select * from numbers1 limit 3"))
-	//	    //.map(r -> r.getIdentifiers()[0])
-	//		.collect(Collectors.joining( "," ))
-	//        .submit()
-	//        .getCompletionStage().toCompletableFuture();
-	//		return fut.thenApply(s -> {ClientQueryReceiver.selector.wakeup(); System.out.println("Print inside thenApply");return s;});
-	//	}
 }

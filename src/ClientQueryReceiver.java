@@ -1,24 +1,25 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class ClientQueryReceiver {
-	static String host = "127.0.0.1";
-	static int qrcv_port = 4444; //query receiver port
+	private static String host = "127.0.0.1";
+	private static int qrcv_port = 4444; //query receiver port
+	private static int count = 0;
 
 	public static Selector selector;
-	private static List<SocketChannel> channels = new ArrayList<SocketChannel>();
+	private static Map<Integer, ResponseHandler> futures = new HashMap<Integer, ResponseHandler>();
 
 	public static void queryListner() throws Exception {  
 		selector = Selector.open();
@@ -31,21 +32,24 @@ public class ClientQueryReceiver {
 				// selector has been woken up 
 				// Message passing will be needed to determine index of response ready
 				//int idx = QueryHandler.readyResponseIdx.poll();
-				replyQueryResp(0);
+				replyQueryResp();
 				continue;
 			}
 			processReadySet(selector.selectedKeys());
+			if(!QueryHandler.readyResponseIdx.isEmpty()) {
+				replyQueryResp();
+			}
 		}
 	}
 
-	private static void replyQueryResp(int idx) {
+	private static void replyQueryResp() {
 		try {
-			String result = QueryHandler.getRespose();
-			SocketChannel channel = channels.get(0);
+			int fut_idx = QueryHandler.readyResponseIdx.poll();
+			String result = QueryHandler.getRespose(futures.get(fut_idx).getFuture());
 			result += "END\n";
 			ByteBuffer bb = ByteBuffer.wrap(result.getBytes());
 			while(bb.hasRemaining())
-				channel.write(bb);
+				futures.get(fut_idx).getChannel().write(bb);
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,14 +73,15 @@ public class ClientQueryReceiver {
 				SocketChannel sChannel = (SocketChannel) ssChannel.accept();
 				sChannel.configureBlocking(false);
 				sChannel.register(key.selector(), SelectionKey.OP_READ);
-				channels.add(sChannel);
 			}
 			if (key.isReadable()) {
 				String msg = processRead(key);
 				if (msg != null && msg.length() > 0) {
 					System.out.println("Received Query: "+ msg);
 					// TODO Send query to the API
-					QueryHandler.processQuery(msg);
+					int future_key = intKeyGenerator();
+					CompletableFuture<?> fut = QueryHandler.processQuery(msg, future_key);
+					futures.put(future_key, new ResponseHandler((SocketChannel)key.channel(), fut));
 				}
 			}
 		}
@@ -89,20 +94,22 @@ public class ClientQueryReceiver {
 			int bytesCount = sChannel.read(buffer);
 			if (bytesCount > 0) {
 				buffer.flip();
-				//return new String(buffer.array());
-				//return new String( buffer.array(), Charset.forName("UTF-8") );
 				return StandardCharsets.UTF_8.decode(buffer).toString();
 			}
 			if(bytesCount == -1 && !sChannel.isOpen()) {
 				// Close connection
 				sChannel.close();
 				key.cancel();
-				channels.remove(sChannel);
 			}
 			return null;
 		}catch(IOException ex) {
-			System.out.println("Connection closed by the server");
+			System.out.println("Connection closed by the client");
 		}
 		return null;
+	}
+	
+	private static Integer intKeyGenerator() {
+		count++;
+		return count;
 	}
 }
