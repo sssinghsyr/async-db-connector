@@ -9,3 +9,8 @@ Goals:
 Single-threaded approach:
 1. event-based, non-blocking paradigm
 2. avoiding context switches, locks, and blocking
+
+
+Changes made:
+1. Once submission is completed, query response is sent to the client by spawning new thread in the background.
+2. Main-thread task is just to listen query from the client and call async-db-access API.
