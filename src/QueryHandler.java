@@ -1,8 +1,4 @@
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class QueryHandler {
 	private static DbHandler dh = new DbHandler("10.176.16.231");
