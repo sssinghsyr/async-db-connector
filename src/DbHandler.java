@@ -28,20 +28,12 @@ public class DbHandler {
 		return fut.thenApply(s -> {ClientQueryReceiver.selector.wakeup(); System.out.println("Print inside thenApply");return s;}); 
 	}
 
-	public CompletableFuture<String> multipleRowOperation(String sql, int future_key) {
-		String debug = "select * from numbers1 limit 3";
-		System.out.println("debug="+escapeNonAscii(debug));
-		System.out.println("sql="+escapeNonAscii(sql));
-		int c = debug.compareTo(sql);
-		if(c == 0)
-			System.out.println("SAME");
+	public CompletableFuture<String> multipleRowOperation(String sql, ResponseHandler respHandlr) {
 		CompletableFuture<String> fut = conn.<String>rowOperation(sql)
 				.collect(CollectorUtils.rowCollector("csv"))
 				.submit()
 				.getCompletionStage().toCompletableFuture();
-		return fut.thenApply(s -> {QueryHandler.readyResponseIdx.add(future_key);
-									ClientQueryReceiver.selector.wakeup();
-									System.out.println("Print inside thenApply");
+		return fut.thenApply(s -> {respHandlr.sendResponseToClient(fut);;
 									return s;});
 	}
 

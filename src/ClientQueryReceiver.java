@@ -16,10 +16,8 @@ import java.util.concurrent.ExecutionException;
 public class ClientQueryReceiver {
 	private static String host = "127.0.0.1";
 	private static int qrcv_port = 4444; //query receiver port
-	private static int count = 0;
 
 	public static Selector selector;
-	private static Map<Integer, ResponseHandler> futures = new HashMap<Integer, ResponseHandler>();
 
 	public static void queryListner() throws Exception {  
 		selector = Selector.open();
@@ -29,33 +27,9 @@ public class ClientQueryReceiver {
 		ssChannel.register(selector, SelectionKey.OP_ACCEPT);
 		while (true) {
 			if (selector.select() <= 0) {
-				// selector has been woken up 
-				// Message passing will be needed to determine index of response ready
-				//int idx = QueryHandler.readyResponseIdx.poll();
-				replyQueryResp();
 				continue;
 			}
 			processReadySet(selector.selectedKeys());
-			if(!QueryHandler.readyResponseIdx.isEmpty()) {
-				replyQueryResp();
-			}
-		}
-	}
-
-	private static void replyQueryResp() {
-		try {
-			int fut_idx = QueryHandler.readyResponseIdx.poll();
-			String result = QueryHandler.getRespose(futures.get(fut_idx).getFuture());
-			result += "END\n";
-			ByteBuffer bb = ByteBuffer.wrap(result.getBytes());
-			while(bb.hasRemaining())
-				futures.get(fut_idx).getChannel().write(bb);
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -79,9 +53,7 @@ public class ClientQueryReceiver {
 				if (msg != null && msg.length() > 0) {
 					System.out.println("Received Query: "+ msg);
 					// TODO Send query to the API
-					int future_key = intKeyGenerator();
-					CompletableFuture<?> fut = QueryHandler.processQuery(msg, future_key);
-					futures.put(future_key, new ResponseHandler((SocketChannel)key.channel(), fut));
+					QueryHandler.processQuery(msg, new ResponseHandler((SocketChannel)key.channel()));
 				}
 			}
 		}
@@ -106,10 +78,5 @@ public class ClientQueryReceiver {
 			System.out.println("Connection closed by the client");
 		}
 		return null;
-	}
-	
-	private static Integer intKeyGenerator() {
-		count++;
-		return count;
 	}
 }
