@@ -9,3 +9,6 @@ Goals:
 Single-threaded approach:
 1. event-based, non-blocking paradigm
 2. avoiding context switches, locks, and blocking
+
+TODO:
+1. Exception handling, sending exception back to the client
