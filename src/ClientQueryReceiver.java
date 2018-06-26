@@ -29,9 +29,6 @@ public class ClientQueryReceiver {
 		ssChannel.register(selector, SelectionKey.OP_ACCEPT);
 		while (true) {
 			if (selector.select() <= 0) {
-				// selector has been woken up 
-				// Message passing will be needed to determine index of response ready
-				//int idx = QueryHandler.readyResponseIdx.poll();
 				replyQueryResp();
 				continue;
 			}
@@ -77,8 +74,6 @@ public class ClientQueryReceiver {
 			if (key.isReadable()) {
 				String msg = processRead(key);
 				if (msg != null && msg.length() > 0) {
-					System.out.println("Received Query: "+ msg);
-					// TODO Send query to the API
 					int future_key = intKeyGenerator();
 					CompletableFuture<?> fut = QueryHandler.processQuery(msg, future_key);
 					futures.put(future_key, new ResponseHandler((SocketChannel)key.channel(), fut));
