@@ -26,18 +26,12 @@ public class CollectorUtils {
 			      () -> new String[] {""},
 			      (a, v) -> {
 			        for(String column : v.getIdentifiers()) {
-			           //System.out.println("Column="+column);
 			           a[0] += column+"="+v.get(column, Object.class);
 			           a[0] += ",";
 			        }
 			        a[0] += '\n';
-			        //System.out.println("Result from accumulator:"+a[0]);
 			      },
-			      (a, b) -> {/*System.out.println("Result from combiner:"+a[0]);*/ return null;},
-			      a -> {/*System.out.println("Result from finisher:"+a[0]);*/return a[0];});
-	}
-	
-	public static void check(Result.Row r) {
-		System.out.println(r.toString());
+			      (a, b) -> null,
+			      a -> a[0]);
 	}
 }

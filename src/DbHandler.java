@@ -13,7 +13,6 @@ public class DbHandler {
 	}
 
 	public CompletableFuture<Integer> singleRowOperation(String sql){
-		System.out.println("Query: ["+sql+"]");
 		CompletableFuture<Integer> fut = conn.<Integer>rowOperation("SELECT i as t FROM numbers1")
 				.collect(CollectorUtils.singleCollector(Integer.class))
 				.submit()

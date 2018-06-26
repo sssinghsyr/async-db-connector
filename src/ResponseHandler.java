@@ -20,7 +20,6 @@ public class ResponseHandler {
 				ByteBuffer bb;
 				try {
 					String result = (String) future.get();
-					//System.out.println("Inside sendResposeToClient: "+result);
 					result += "END\n";
 					bb = ByteBuffer.wrap(result.getBytes());
 
