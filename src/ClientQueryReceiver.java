@@ -57,7 +57,6 @@ public class ClientQueryReceiver {
 			if (key.isReadable()) {
 				String msg = processRead(key);
 				if (msg != null && msg.length() > 0) {
-					// TODO Send query to the API
 					QueryHandler.processQuery(msg, new ResponseHandler((SocketChannel)key.channel()));
 				}
 			}
