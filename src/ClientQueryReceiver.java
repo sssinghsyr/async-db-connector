@@ -12,8 +12,9 @@ import java.util.Set;
 public class ClientQueryReceiver {
 	private static String host = "127.0.0.1";
 	private static int qrcv_port = 4444; //query receiver port
-
+	private static int counter;
 	public static Selector selector;
+	public static double start = 0; 
 
 	public static void queryListner() throws Exception {  
 		selector = Selector.open();
@@ -36,6 +37,7 @@ public class ClientQueryReceiver {
 	}
 
 	private static void initResources() {
+		counter = 0;
 		ResponseHandler.init();
 	}
 	
@@ -52,12 +54,18 @@ public class ClientQueryReceiver {
 				ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
 				SocketChannel sChannel = (SocketChannel) ssChannel.accept();
 				sChannel.configureBlocking(false);
-				sChannel.register(key.selector(), SelectionKey.OP_READ);
+				SelectionKey selectionKey = sChannel.register(key.selector(), SelectionKey.OP_READ);
+				counter++;
+				selectionKey.attach(counter);
+				if(counter == 5) {
+					start = System.nanoTime() / 1e3;
+					//System.out.printf("Start curr time %.1f us%n", System.nanoTime() / 1e3);
+				}
 			}
 			if (key.isReadable()) {
 				String msg = processRead(key);
 				if (msg != null && msg.length() > 0) {
-					QueryHandler.processQuery(msg, new ResponseHandler((SocketChannel)key.channel()));
+					QueryHandler.processQuery(msg, new ResponseHandler((SocketChannel)key.channel(), (int) key.attachment()));
 				}
 			}
 		}
@@ -72,7 +80,7 @@ public class ClientQueryReceiver {
 				buffer.flip();
 				return StandardCharsets.UTF_8.decode(buffer).toString();
 			}
-			if(bytesCount == -1 && !sChannel.isOpen()) {
+			if(bytesCount == -1 && sChannel.isOpen()) {
 				// Close connection
 				sChannel.close();
 				key.cancel();

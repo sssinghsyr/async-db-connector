@@ -31,7 +31,7 @@ public class DbHandler {
 
 	public CompletableFuture<String> multipleRowOperation(String sql, ResponseHandler respHandlr) {
 		PGConnection conn = (PGConnection) ds.getConnection();
-	    conn.connectDb();
+	    //conn.connectDb();
 		CompletableFuture<String> fut = conn.<String>rowOperation(sql)
 				.collect(CollectorUtils.rowCollector("csv"))
 				.submit()
