@@ -17,4 +17,6 @@ Changes made:
 3. Main-thread task is just to listen query from the client and call async-db-access API.
 
 TODO:
-1. Exception handling, sending exception back to the client
+1. Implement ConnectionPool feature
+2. Make changes to capture latency and throughput
+3. Exception handling, sending exception back to the client
