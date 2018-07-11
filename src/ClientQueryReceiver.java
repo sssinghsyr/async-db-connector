@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class ClientQueryReceiver {
-	private static String host = "127.0.0.1";
+	private static String host = "10.176.16.231";
 	private static int qrcv_port = 4444; //query receiver port
 	private static int counter;
 	public static Selector selector;
@@ -38,11 +38,11 @@ public class ClientQueryReceiver {
 
 	private static void initResources() {
 		counter = 0;
-		ResponseHandler.init();
+		//ResponseHandler.init();
 	}
 	
 	private static void shutDownResources() {
-		ResponseHandler.close();
+		//ResponseHandler.close();
 	}
 
 	public static void processReadySet(Set<SelectionKey> readySet) throws Exception {
