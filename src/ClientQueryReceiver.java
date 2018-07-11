@@ -33,16 +33,10 @@ public class ClientQueryReceiver {
 	public static void main(String[] args) throws Exception {
 		initResources();
 		queryListner();
-		shutDownResources();
 	}
 
 	private static void initResources() {
 		counter = 0;
-		//ResponseHandler.init();
-	}
-	
-	private static void shutDownResources() {
-		//ResponseHandler.close();
 	}
 
 	public static void processReadySet(Set<SelectionKey> readySet) throws Exception {

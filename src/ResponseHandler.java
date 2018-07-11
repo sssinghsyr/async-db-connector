@@ -8,19 +8,16 @@ public class ResponseHandler {
 
 	static final int TXN_CNT = 6005;
 	private int idx;
-	//private long start;
 
 	ResponseHandler(SocketChannel channel, int idx) {
 		this.channel = channel;
 		this.idx = idx;
-		//System.out.println("RspnsHdlr for "+idx);
-		//this.start = System.nanoTime();
+
 	}
 
 	private SocketChannel channel;
 
 	public void sendResponseToClient(CompletableFuture<?> future) {
-		//System.out.println("sendResponseToClient:"+Thread.currentThread().getId());
 		ByteBuffer bb;
 		try {
 			String result = (String) future.get();
@@ -39,15 +36,8 @@ public class ResponseHandler {
 			e.printStackTrace();
 		}
 		if(idx == TXN_CNT) {
-			//System.out.printf("End curr time %.1f us%n", System.nanoTime() / 1e3);
 			double end = System.nanoTime() / 1e3;
-
 			System.out.println("Throughput for "+TXN_CNT+" connections = "+(TXN_CNT/((end-ClientQueryReceiver.start)/1e6))+" req/sec");
 		}
-		/*long end = System.nanoTime();
-				long err = System.nanoTime() - end;
-				long time = end - start - err;
-				System.out.printf("Execution time %.1f us%n", time / 1e3);*/
-
 	}
 }

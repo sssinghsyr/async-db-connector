@@ -1,13 +1,5 @@
-import jdk.incubator.sql2.AdbaType;
-import jdk.incubator.sql2.Connection;
 import jdk.incubator.sql2.DataSource;
-import jdk.incubator.sql2.SqlException;
-import jdk.incubator.sql2.Transaction;
-import java.util.logging.Logger;
-import java.util.stream.Collector;
-import java.util.logging.Level;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
