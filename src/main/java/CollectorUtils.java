@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.stream.Collector;
 import jdk.incubator.sql2.Result;
 

@@ -1,0 +1,27 @@
+plugins {
+    // Apply the java plugin to add support for Java
+    id 'java'
+
+    // Apply the application plugin to add support for building an application
+    id 'application'
+}
+
+// Define the main class for the application
+mainClassName = 'ClientQueryReceiver'
+
+compileJava.options.encoding = 'UTF-8'
+
+sourceCompatibility = "1.10"
+targetCompatibility = "1.10"
+
+dependencies {
+    // This dependency is found on compile classpath of this component and consumers.
+    compile files('lib/pgsql2-1.0-SNAPSHOT.jar')
+    // Use JUnit test framework
+    testCompile 'junit:junit:4.12'
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    mavenCentral()
+}
