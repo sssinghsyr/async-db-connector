@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.stream.Collector;
 import jdk.incubator.sql2.Result;
 
@@ -33,9 +35,5 @@ public class CollectorUtils {
 			      },
 			      (a, b) -> null,
 			      a -> a[0]);
-	}
-	
-	public static void check(Result.Row r) {
-		System.out.println(r.toString());
 	}
 }
