@@ -8,7 +8,7 @@ plugins {
 
 // Define the main class for the application
 mainClassName = 'ClientQueryReceiver'
-
+apply plugin : 'eclipse'
 compileJava.options.encoding = 'UTF-8'
 
 sourceCompatibility = "1.10"
@@ -17,11 +17,25 @@ targetCompatibility = "1.10"
 dependencies {
     // This dependency is found on compile classpath of this component and consumers.
     compile files('lib/pgsql2-1.0-SNAPSHOT.jar')
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.19.0'
+    testCompile group: 'org.testcontainers', name: 'postgresql', version: '1.7.1'
     // Use JUnit test framework
-    testCompile 'junit:junit:4.12'
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+    )
 }
 
 // In this section you declare where to find the dependencies of your project
 repositories {
     mavenCentral()
+}
+
+test {
+    useJUnitPlatform()
+    testLogging{
+		showStandardStreams = true
+	}
 }
