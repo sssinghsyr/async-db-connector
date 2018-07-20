@@ -27,6 +27,16 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.1.0'
     )
 }
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': '1',
+                'Main-Class': 'main.java.ClientQueryReceiver'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {

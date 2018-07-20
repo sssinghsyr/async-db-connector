@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.postgresql.sql2.util.PGCount;
 
 import jdk.incubator.sql2.Connection;
 import jdk.incubator.sql2.DataSource;
@@ -22,8 +23,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 class FirstLight {
 
-	public static final String TRIVIAL = "SELECT 1 as t";
-
 	public static PostgreSQLContainer postgres = DatabaseHolder.getCached();
 
 	@BeforeAll
@@ -31,8 +30,8 @@ class FirstLight {
 		try (Connection conn = ConnectUtil.openDB(postgres).getConnection()) {
 			conn.operation("create table emp(id int, empno int, ename varchar(10), deptno int)")
 			.submit().getCompletionStage().toCompletableFuture().get(10, TimeUnit.SECONDS);
-			conn.operation("insert into emp(id, empno, ename, deptno) values(1, 2, 'empname', 3)")
-			.submit().getCompletionStage().toCompletableFuture().get(10, TimeUnit.SECONDS);
+			/*conn.operation("insert into emp(id, empno, ename, deptno) values(1, 2, 'empname', 3)")
+			.submit().getCompletionStage().toCompletableFuture().get(10, TimeUnit.SECONDS);*/
 		}
 	}
 
@@ -46,6 +45,7 @@ class FirstLight {
 	 */
 	@Test
 	public void sqlOperation() throws InterruptedException, ExecutionException, TimeoutException{
+		String TRIVIAL = "SELECT 1 as t";
 		DataSource ds = ConnectUtil.openDB(postgres);
 		Connection conn = ds.getConnection(t -> fail("ERROR: " + t.getMessage()));
 		try (conn) {
@@ -54,6 +54,22 @@ class FirstLight {
 			.submit()
 			.getCompletionStage().toCompletableFuture();
 			assertEquals(1, fut.get(10, TimeUnit.SECONDS).intValue());
+		}
+	}
+	
+	/**
+	 * insert a row into to the database table
+	 */
+	@Test
+	public void insertOperation() throws InterruptedException, ExecutionException, TimeoutException{
+		String INSERT = "insert into emp(id, empno, ename, deptno) values(1, 2, 'empname', 3)";
+		DataSource ds = ConnectUtil.openDB(postgres);
+		Connection conn = ds.getConnection(t -> fail("ERROR: " + t.getMessage()));
+		try (conn) {
+			assertNotNull(conn);
+			CompletableFuture<Object> fut = conn.countOperation(INSERT)
+	          .submit().getCompletionStage().toCompletableFuture();
+			assertEquals(1, ((PGCount)fut.get(10, TimeUnit.SECONDS)).getCount());
 		}
 	}
 }
